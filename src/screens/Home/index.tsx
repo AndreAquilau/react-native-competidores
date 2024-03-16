@@ -61,8 +61,8 @@ export function HomeScreen({ route, navigation }: any) {
       <Button title="Pesquisar por Nome" onPress={() => pesquisarCompeditor()} color={'#008000'} />
       <Separator />
       <Button title="Limpar Filtro" onPress={async () => { setNomeCompedidorBuscar(''); await fetchCompetitors() }} color={'#265369'} />
-      {competitors.length === 0 && <Text>Sem competidores cadastrados</Text>}
-
+      <Separator />
+      {competitors.length === 0 && <Text style={{textAlign: 'center'}}>Sem competidores cadastrados</Text>}
       <FlatList
         data={competitors}
         keyExtractor={(item) => item.id.toString()}
