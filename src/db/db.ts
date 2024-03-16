@@ -61,9 +61,9 @@ export const getCompetidores = async () => {
   return results.rows.raw() as Competidor[];
 };
 
-export const getCompetidorByName = async (primeiroNome: string) => {
+export const getCompetidorByName = async (nome: string) => {
   const db = await getDbConnection();
-  const [results] = await db.executeSql('SELECT * FROM COMPETITOR WHERE primeiroNome = ?', [primeiroNome]);
+  const [results] = await db.executeSql(`SELECT * FROM COMPETITOR WHERE (UPPER(primeiroNome) || ' ' || segundoNome) LIKE ? ORDER BY (UPPER(primeiroNome) || ' ' || segundoNome)`, [`%${nome}%`]);
   
   return results.rows.raw() as Competidor[];
 }
@@ -73,6 +73,13 @@ export const getCompetidorById = async (id: number) => {
   const [results] = await db.executeSql('SELECT * FROM COMPETITOR WHERE id = ?', [id]);
   
   return results.rows.raw() as Competidor[];
+}
+
+export const deleteCompetidorById = async (id: number) => {
+  const db = await getDbConnection();
+  const [results] = await db.executeSql('DELETE FROM COMPETITOR WHERE id = ?', [id]);
+  
+  return results.rows;
 }
 
 export const updateCompetidor = async (id: number, competidor: Partial<Competidor>) => {

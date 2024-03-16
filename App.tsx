@@ -38,13 +38,13 @@ function App(): React.JSX.Element {
             ),
           }}
         />
-        <Tab.Screen
+        <Tab.Screen 
           name="Competidor"
           component={CompetidorScreen}
           options={{
             tabBarLabel: 'Competidor',
             tabBarIcon: ({ color, size }) => (
-              <MaterialCommunityIcons name="account-plus-outline" color={color} size={size} />
+              <MaterialCommunityIcons name="account" color={color} size={size} />
             ),
           }}
         />

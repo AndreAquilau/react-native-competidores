@@ -2,14 +2,47 @@ import React, { useEffect, useState } from 'react';
 import { Button, TextInput, View, StyleSheet, Alert, TouchableOpacity, ScrollView, Text } from 'react-native';
 import axios from 'axios';
 import Competidor from '../../interfaces/competidor-interface';
-import { addCompetidor, getCompetidorById } from '../../db/db';
+import { addCompetidor, deleteCompetidorById, getCompetidorById, updateCompetidor } from '../../db/db';
 
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 
+export type TypeMode = 'View' | 'Create' | 'Edit';
 
-export function CompetidorScreen({ navigation }: any) {
+export function CompetidorScreen({ route, navigation }: any) {
+
+    const [modeScreen, setModeScreen] = useState<TypeMode>('Create');
+
+    if (route.params) {
+
+        if (route.params['mode']) {
+            console.log("Params: ", route.params);
+
+            if (route.params['mode']) {
+                setModeScreen(route.params['mode'] as TypeMode);
+            }
+
+            console.log(`Mode: ${modeScreen} `);
+
+            if (route.params['mode'] as TypeMode === 'View') {
+                console.log('View: ' + route.params['id']);
+
+                getCompetidorById(Number(route.params['id']))
+                    .then((data) => {
+
+                        if (data.length > 0) {
+                            setCompetidor({ ...data[0] });
+
+                        }
+                    });
+            }
+
+            const { mode, id, ...params } = route.params;
+            route.params = params;
+
+        }
+    }
 
     const [competidor, setCompetidor] = useState<Competidor>({
         id: 0,
@@ -68,17 +101,59 @@ export function CompetidorScreen({ navigation }: any) {
                 console.log(res[0].insertId);
 
                 getCompetidorById(res[0].insertId).then((data) => console.log(data));
-                cleanCompetidor(setCompetidor);
-                resetValidator();
-                Alert.alert("Usuário cadastrado!")
 
+                Alert.alert("Competidor cadastrado!")
                 setTimeout(() => navigation.navigate('Home', { id: res[0].insertId }), 2000);
             })
             .catch((err) => {
-                Alert.alert("Erro ao cadastrar usuário!")
-                setTimeout(() => navigation.navigate('Home'), 2000);
+                Alert.alert("Erro ao cadastrar competidor!");
+                setTimeout(() => navigation.navigate('Home'), 5000);
             });
 
+        cleanCompetidor(setCompetidor);
+        resetValidator();
+        setModeScreen('Create');
+    };
+
+    const atualizarCompetidor = () => {
+        //cleanCompetidor(setCompetidor);
+        //resetValidator();
+        //setModeScreen('Create');
+
+        updateCompetidor(competidor.id, competidor)
+            .then(data => {
+                console.log(data);
+                Alert.alert("Competidor atualizado!")
+
+            })
+            .catch((err) => {
+                Alert.alert("Erro ao atualizar competidor!");
+            });
+
+        setTimeout(() => navigation.navigate('Home', { id: competidor.id }), 2000);
+        cleanCompetidor(setCompetidor);
+        resetValidator();
+        setModeScreen('Create');
+    };
+
+    const deletarCompetidor = () => {
+        //cleanCompetidor(setCompetidor);
+        //resetValidator();
+        //setModeScreen('Create');
+
+        deleteCompetidorById(competidor.id)
+            .then(data => {
+                console.log(data);
+                Alert.alert("Competidor deletado!")
+            })
+            .catch((err) => {
+                Alert.alert("Erro ao deletar competidor!");
+            });
+
+        setTimeout(() => navigation.navigate('Home', { id: competidor.id }),2000);
+        cleanCompetidor(setCompetidor);
+        resetValidator();
+        setModeScreen('Create');
 
     };
 
@@ -281,6 +356,7 @@ export function CompetidorScreen({ navigation }: any) {
                 onChangeText={(value) => handleChangeText('primeiroNome', value)}
                 style={styles.input}
                 onBlur={() => validatorForm('primeiroNome', competidor.primeiroNome)}
+                editable={modeScreen != 'View'}
             />
             {primeiroNomeError && <Text style={styles.error}>{primeiroNomeError}</Text>}
 
@@ -290,6 +366,7 @@ export function CompetidorScreen({ navigation }: any) {
                 onChangeText={(value) => handleChangeText('segundoNome', value)}
                 style={styles.input}
                 onBlur={() => validatorForm('segundoNome', competidor.segundoNome)}
+                editable={modeScreen != 'View'}
             />
             {segundoNomeError && <Text style={styles.error}>{segundoNomeError}</Text>}
 
@@ -299,8 +376,10 @@ export function CompetidorScreen({ navigation }: any) {
                 onChangeText={(value) => handleChangeText('email', value)}
                 style={styles.input}
                 onBlur={() => validatorForm('email', competidor.email)}
+                editable={modeScreen != 'View'}
             />
             {EmailError && <Text style={styles.error}>{EmailError}</Text>}
+
 
             <TextInput
                 placeholder="Telefone"
@@ -308,6 +387,7 @@ export function CompetidorScreen({ navigation }: any) {
                 onChangeText={(value) => handleChangeText('telefone', value)}
                 style={styles.input}
                 onBlur={() => validatorForm('telefone', competidor.telefone)}
+                editable={modeScreen != 'View'}
             />
             {TelefoneError && <Text style={styles.error}>{EmailError}</Text>}
 
@@ -318,15 +398,17 @@ export function CompetidorScreen({ navigation }: any) {
                     handleChangeText('cep', value.replace(/[^0-9]/g, '').substring(0, 8))}
                 style={styles.input}
                 onBlur={() => validatorForm('cep', competidor.cep.replace(/[^0-9]/g, '').substring(0, 8))}
+                editable={modeScreen != 'View'}
             />
             {cepError && <Text style={styles.error}>{cepError}</Text>}
 
-            <Button title="Buscar Endereço" onPress={() => getAddress()} color={'#008000'} />
+            {modeScreen != 'View' && <Button title="Buscar Endereço" onPress={() => getAddress()} color={'#008000'} />}
             <TextInput
                 placeholder="Rua" value={competidor.logradouro}
                 onChangeText={(value) => handleChangeText('logradouro', value)}
                 style={styles.input}
                 onBlur={() => validatorForm('logradouro', competidor.logradouro)}
+                editable={modeScreen != 'View'}
             />
             {logradouroError && <Text style={styles.error}>{logradouroError}</Text>}
 
@@ -336,6 +418,7 @@ export function CompetidorScreen({ navigation }: any) {
                 onChangeText={(value) => handleChangeText('numero', value.replace(/[^0-9]/g, ''))}
                 style={styles.input}
                 onBlur={() => validatorForm('numero', competidor.numero.replace(/[^0-9]/g, ''))}
+                editable={modeScreen != 'View'}
             />
             {numeroError && <Text style={styles.error}>{numeroError}</Text>}
 
@@ -345,6 +428,7 @@ export function CompetidorScreen({ navigation }: any) {
                 onChangeText={(value) => handleChangeText('bairro', value)}
                 style={styles.input}
                 onBlur={() => validatorForm('bairro', competidor.bairro)}
+                editable={modeScreen != 'View'}
             />
             {bairroError && <Text style={styles.error}>{bairroError}</Text>}
 
@@ -354,6 +438,7 @@ export function CompetidorScreen({ navigation }: any) {
                 onChangeText={(value) => handleChangeText('localidade', value)}
                 style={styles.input}
                 onBlur={() => validatorForm('localidade', competidor.localidade)}
+                editable={modeScreen != 'View'}
             />
             {localidadeError && <Text style={styles.error}>{localidadeError}</Text>}
 
@@ -363,16 +448,21 @@ export function CompetidorScreen({ navigation }: any) {
                 onChangeText={(value) => handleChangeText('uf', value.substring(0, 2))}
                 style={styles.input}
                 onEndEditing={() => validatorForm('uf', competidor.uf.substring(0, 2))}
+                editable={modeScreen != 'View'}
             />
             {ufError && <Text style={styles.error}>{ufError}</Text>}
 
-            <Button title="Salvar" onPress={() => !formIsValid() ? insertNewCompetidor() : false} color={'#421781'} />
+            {modeScreen === 'Create' && <Button title="Cadastrar" onPress={() => !formIsValid() ? insertNewCompetidor() : false} />}
+            {modeScreen === 'View' && <Button title="Editar" onPress={() => setModeScreen('Edit')} />}
+            {modeScreen === 'View' && <Separator />}
+            {modeScreen === 'View' && <Button title="Voltar" onPress={() => { resetValidator(); cleanCompetidor(setCompetidor); setModeScreen('Create'); return navigation.navigate('Home') }} />}
             <Separator />
-            <Button title="Cancelar" onPress={() => {
-                resetValidator();
-                cleanCompetidor(setCompetidor);
-                return navigation.navigate('Home')
-            }} color={'#BB1AB2'} />
+            {modeScreen === 'View' || modeScreen === 'Create' && <Button title="Cancelar" onPress={() => { resetValidator(); cleanCompetidor(setCompetidor); setModeScreen('Create'); return navigation.navigate('Home') }} color={'#DD3C4B'} />}
+            {modeScreen === 'Edit' && <Button title="Salvar" onPress={() => !formIsValid() ? atualizarCompetidor() : false} />}
+            {modeScreen === 'Edit' && <Separator />}
+            {modeScreen === 'Edit' && <Button title="Deletar" onPress={() => { resetValidator(); setModeScreen('Create'); deletarCompetidor() }} color={'#DD3C4B'} />}
+            {modeScreen === 'Edit' && <Separator />}
+            {modeScreen === 'Edit' && <Button title="Voltar" onPress={() => { resetValidator(); setModeScreen('Create'); return navigation.navigate('Home', { id: 0 }) }} />}
             <Separator />
         </ScrollView>
     );
