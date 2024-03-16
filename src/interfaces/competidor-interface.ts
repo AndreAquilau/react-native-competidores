@@ -3,6 +3,7 @@ export default interface Competidor {
     primeiroNome: string;
     segundoNome: string;
     email: string;
+    telefone: string;
     cep: string;
     logradouro: string;
     numero: string;

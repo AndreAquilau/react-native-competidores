@@ -23,6 +23,7 @@ export const getDbConnection = async () => {
       primeiroNome TEXT,
       segundoNome TEXT,
       email TEXT,
+      telefone TEXT,
       cep TEXT,
       logradouro TEXT,
       numero TEXT,
@@ -40,10 +41,11 @@ export const addCompetidor = async (competidor: Omit<Competidor, 'id'>) => {
   const db = await getDbConnection();
   
   return db.executeSql(
-    'INSERT INTO COMPETITOR (primeiroNome, segundoNome, email, cep, logradouro, numero, bairro, localidade, uf) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+    'INSERT INTO COMPETITOR (primeiroNome, segundoNome, email, telefone, cep, logradouro, numero, bairro, localidade, uf) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
     [competidor.primeiroNome, 
      competidor.segundoNome, 
      competidor.email,
+     competidor.telefone,
      competidor.cep, 
      competidor.logradouro, 
      competidor.numero, 
@@ -54,7 +56,7 @@ export const addCompetidor = async (competidor: Omit<Competidor, 'id'>) => {
 
 export const getCompetidores = async () => {
   const db = await getDbConnection();
-  const [results] = await db.executeSql('SELECT * FROM COMPETITOR');
+  const [results] = await db.executeSql('SELECT * FROM COMPETITOR ORDER BY id DESC  LIMIT 0, 50');
   
   return results.rows.raw() as Competidor[];
 };
@@ -78,4 +80,11 @@ export const updateCompetidor = async (id: number, competidor: Partial<Competido
   const paramNames = Object.keys(competidor).join(" = ?,") + " = ?";
   const paramValues = Object.values(competidor);
   return db.executeSql(`UPDATE COMPETITOR SET ${paramNames} WHERE id = ?`, [...paramValues, id]);
+};
+
+export const executeSQLQueryString = async (query: string) => {
+  const db = await getDbConnection();
+  const [results] = await db.executeSql(query);
+  
+  return results.rows.raw() as Competidor[];
 };

@@ -16,6 +16,7 @@ export function CompetidorScreen({ navigation }: any) {
         primeiroNome: '',
         segundoNome: '',
         email: '',
+        telefone: '',
         cep: '',
         logradouro: '',
         numero: '',
@@ -71,7 +72,7 @@ export function CompetidorScreen({ navigation }: any) {
                 resetValidator();
                 Alert.alert("Usuário cadastrado!")
 
-                setTimeout(() => navigation.navigate('Home'), 2000);
+                setTimeout(() => navigation.navigate('Home', { id: res[0].insertId }), 2000);
             })
             .catch((err) => {
                 Alert.alert("Erro ao cadastrar usuário!")
@@ -90,6 +91,7 @@ export function CompetidorScreen({ navigation }: any) {
     const [primeiroNomeError, setPrimeiroNomeError] = useState('');
     const [segundoNomeError, setSegundoNomeError] = useState('');
     const [EmailError, setEmailError] = useState('');
+    const [TelefoneError, setTelefoneError] = useState('');
     const [cepError, setCepNomeError] = useState('');
     const [logradouroError, setLogradouroNomeError] = useState('');
     const [numeroError, setNumeroError] = useState('');
@@ -101,6 +103,7 @@ export function CompetidorScreen({ navigation }: any) {
         setPrimeiroNomeError('');
         setSegundoNomeError('');
         setEmailError('');
+        setTelefoneError('');
         setCepNomeError('');
         setLogradouroNomeError('');
         setNumeroError('');
@@ -148,6 +151,18 @@ export function CompetidorScreen({ navigation }: any) {
             else {
 
                 setEmailError(''); return false;
+            }
+
+        }
+
+        if (name === 'telefone') {
+            if (value === '') {
+
+                setTelefoneError('Telefone inválido'); return true;
+            }
+            else {
+
+                setTelefoneError(''); return false;
             }
 
         }
@@ -234,17 +249,19 @@ export function CompetidorScreen({ navigation }: any) {
         const primeiroNomeIsValid = validatorForm('primeiroNome', competidor.primeiroNome);
         const segundoNomeIsValid = validatorForm('segundoNome', competidor.segundoNome);
         const emailIsValid = validatorForm('email', competidor.email);
+        const telefoneIsValid = validatorForm('telefone', competidor.telefone);
         const cepIsValid = validatorForm('cep', competidor.cep);
         const logradouroIsValid = validatorForm('logradouro', competidor.logradouro);
-        const numeroIsValid = validatorForm('primeiroNome', competidor.primeiroNome);
+        const numeroIsValid = validatorForm('numero', competidor.numero);
         const bairroIsValid = validatorForm('bairro', competidor.bairro);
         const localidadeIsValid = validatorForm('localidade', competidor.localidade);
         const ufIsValid = validatorForm('uf', competidor.uf);
 
         return (
-            primeiroNomeIsValid 
-            || segundoNomeIsValid 
+            primeiroNomeIsValid
+            || segundoNomeIsValid
             || emailIsValid
+            || telefoneIsValid
             || cepIsValid
             || logradouroIsValid
             || numeroIsValid
@@ -284,6 +301,15 @@ export function CompetidorScreen({ navigation }: any) {
                 onBlur={() => validatorForm('email', competidor.email)}
             />
             {EmailError && <Text style={styles.error}>{EmailError}</Text>}
+
+            <TextInput
+                placeholder="Telefone"
+                value={competidor.telefone}
+                onChangeText={(value) => handleChangeText('telefone', value)}
+                style={styles.input}
+                onBlur={() => validatorForm('telefone', competidor.telefone)}
+            />
+            {TelefoneError && <Text style={styles.error}>{EmailError}</Text>}
 
             <TextInput
                 placeholder="CEP"
@@ -362,6 +388,7 @@ function cleanCompetidor(setData: (data: any) => any) {
         primeiroNome: '',
         segundoNome: '',
         email: '',
+        telefone: '',
         cep: '',
         logradouro: '',
         numero: '',
